@@ -1,6 +1,6 @@
 {
   "name": "password-generator-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A password generator for both node and browsers",
   "main": "index.js",
   "scripts": {
