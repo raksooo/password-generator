@@ -43,7 +43,7 @@ password = passwordGenerator.generatePasswordAsync(options, randomFunction)
 ```
 
 Options:
-```json
+```javascript
 {
     length: 25,
     uppercase: true,
