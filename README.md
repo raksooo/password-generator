@@ -42,8 +42,15 @@ password = PasswordGenerator.generatePasswordAsync({ length: 20 }, c => {
             c(result.random.data[0])
         });
 }).then(console.log.bind(console))
+
+password = PasswordGenerator.generatePasswordAsync({ length: 20 }, () => {
+    let RandomOrg = require('random-org')
+    let random = new RandomOrg({ apiKey: '12345-67890-api-key' })
+    return random.generateDecimalFractions()
+        .then(result => result.random.data[0]);
+}).then(console.log.bind(console))
 ```
-The random function should take a callback as argument and call it with the result.
+The random function should take a callback as argument and call it with the result or take no argument and return a promise which resolves with the result.
 
 #### Options
 ```javascript

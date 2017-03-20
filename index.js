@@ -54,7 +54,7 @@ class PasswordGenerator {
 
     generatePasswordAsync(options, randomFunction, callback) {
         options = Object.assign(this._options, options)
-        let random = randomFunction || this._random
+        let random = randomFunction || (callback => callback(this._random()))
         let characters = this._generateCharacters(options)
 
         return new Promise((resolve, reject) => {
@@ -75,12 +75,28 @@ class PasswordGenerator {
         if (i === 0) {
             callback(password)
         } else {
-            randomFunction(random => {
+            let randomCallback = random => {
                 let character = Math.floor(random * characters.length)
                 password += characters[character]
-                this._generatePasswordAsync(--i, password, characters,
+                this._generatePasswordAsync(i - 1, password, characters,
                     randomFunction, callback)
-            })
+            }
+
+            this._promiseOrCallback(randomFunction, randomCallback)
+        }
+    }
+
+    _promiseOrCallback(f, callback) {
+        let promiseCheck = result => typeof result !== 'undefined'
+            && typeof result.then === 'function'
+        let a = {}
+        a.maybePromise = f(function() {
+            if (!promiseCheck(a.maybePromise)) {
+                callback(...arguments)
+            }
+        })
+        if (promiseCheck(a.maybePromise)) {
+            a.maybePromise.then(callback)
         }
     }
 }
