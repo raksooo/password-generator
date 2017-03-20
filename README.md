@@ -1,5 +1,5 @@
 # Password Generator
-A random password generator for node and browsers, which makes it possible to choose random-function.
+A random password generator for node and browsers, which makes it possible to choose random-function. It either creates passwords using combinations of characters, digits and symbols, or from words (english or spanish currently).
 
 ## Installation
 ```sh
@@ -81,4 +81,23 @@ password = passwordGenerator.generatePassword([options, [randomFunction]])
 password = passwordGenerator.generatePasswordAsync(options, randomFunction[, callback])
     .then(callback)
 ```
+
+#### Words
+Both english and spanish is currently available
+##### Node.js
+```javascript
+password = PasswordGenerator.generatePasswordFromWords([length[, language]])
+```
+Language is specified as a string such as 'english' or 'spanish'.
+
+##### Browser
+```html
+<script src="path/to/module/words/english.js"></script>
+<script src="path/to/module/words/spanish.js"></script>
+```
+
+```javascript
+password = PasswordGenerator.generatePasswordFromWords([length[, language]])
+```
+Language is specified as a string such as 'english' or 'spanish'.
 
