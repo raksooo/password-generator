@@ -1,4 +1,3 @@
-
 class PasswordGenerator {
     constructor(options, randomFunction) {
         this._options = Object.assign({
@@ -98,6 +97,26 @@ class PasswordGenerator {
         if (promiseCheck(a.maybePromise)) {
             a.maybePromise.then(callback)
         }
+    }
+
+    static generatePasswordFromWords(numberOfWords = 5, language = 'english') {
+        let languages = {}
+        if (typeof window === 'undefined') {
+            languages.english = require('./words/english.js')
+            languages.spanish = require('./words/spanish.js')
+        } else {
+            languages.english = englishWords
+            languages.spanish = spanishWords
+        }
+        let words = languages[language]
+
+        let password = ''
+        for (let i=0; i<numberOfWords; i++) {
+            let index = Math.floor(Math.random() * words.length)
+            password += words[index]
+        }
+
+        return password
     }
 }
 
