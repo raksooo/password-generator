@@ -43,11 +43,9 @@ class PasswordGenerator {
     }
 
     _generatePassword(options, random, f) {
-        let mergedOptions = JSON.parse(JSON.stringify(this._options))
-        Object.assign(mergedOptions, options)
-        let characters = this._generateCharacters(mergedOptions)
-
-        for (let i=0; i<mergedOptions.length; i++) {
+        options = Object.assign({}, this._options, options)
+        let characters = this._generateCharacters(options)
+        for (let i=0; i<options.length; i++) {
             f(characters, random)
         }
     }
@@ -85,18 +83,14 @@ class PasswordGenerator {
 
     _promiseOrCallback(f) {
         return new Promise((resolve, reject) => {
-            let promiseCheck = result => typeof result !== 'undefined'
-                && typeof result.then === 'function'
             let a = {}
-            a.maybePromise = f(function() {
-                if (!promiseCheck(a.maybePromise)) {
-                    resolve(...arguments)
-                }
-            })
-            if (promiseCheck(a.maybePromise)) {
-                resolve(a.maybePromise)
-            }
+            a.promise = f(random => this._isPromise(a.promise) || resolve(random))
+            this._isPromise(a.promise) && resolve(a.promise)
         })
+    }
+
+    _isPromise(promise) {
+        return typeof promise !== 'undefined' && typeof promise.then === 'function'
     }
 
     static generatePassword(options, random, callback) {
@@ -105,19 +99,17 @@ class PasswordGenerator {
     }
 
     static generatePasswordFromWords(numberOfWords = 5, language = 'english') {
-        let languages = {}
+        let words
         if (typeof window === 'undefined') {
-            languages.english = require('./words/english.js')
-            languages.spanish = require('./words/spanish.js')
+            words = require('./words/' + language + '.js')
         } else {
-            languages.english = englishWords
-            languages.spanish = spanishWords
+            words = window[language + 'Words']
         }
-        let words = languages[language]
 
         let password = ''
         for (let i=0; i<numberOfWords; i++) {
-            password += this._randomFromArray(words, Math.random())
+            let n = Math.floor(Math.random() * words.length)
+            password += words[n]
         }
 
         return password
