@@ -28,13 +28,13 @@ let password = PasswordGenerator.generatePassword([options, [randomFunction]])
 ```javascript
 password = PasswordGenerator.generatePassword([options, [randomFunction]])
 ```
-It is possible to specifiy random function. The function should take no arguments and return a value between 0 and 1. If the random function is asynchronous, use generatePasswordAsync().
+It is possible to specifiy random function. The function should take no arguments and return a value between 0 and 1.
 
 #### Asynchronous
 ```javascript
-password = PasswordGenerator.generatePasswordAsync(options, randomFunction[, callback])
+password = PasswordGenerator.generatePassword(options, randomFunction[, callback])
 
-password = PasswordGenerator.generatePasswordAsync({ length: 20 }, c => {
+password = PasswordGenerator.generatePassword({ length: 20 }, c => {
     let RandomOrg = require('random-org')
     let random = new RandomOrg({ apiKey: '12345-67890-api-key' })
     random.generateDecimalFractions()
@@ -43,7 +43,7 @@ password = PasswordGenerator.generatePasswordAsync({ length: 20 }, c => {
         });
 }).then(console.log.bind(console))
 
-password = PasswordGenerator.generatePasswordAsync({ length: 20 }, () => {
+password = PasswordGenerator.generatePassword({ length: 20 }, () => {
     let RandomOrg = require('random-org')
     let random = new RandomOrg({ apiKey: '12345-67890-api-key' })
     return random.generateDecimalFractions()
@@ -69,7 +69,7 @@ Extra symbols can be used to add possible characters to the algorithm.
 #### Static
 ```javascript
 password = PasswordGenerator.generatePassword([options, [randomFunction]])
-password = PasswordGenerator.generatePasswordAsync(options, randomFunction[, callback])
+password = PasswordGenerator.generatePassword(options, randomFunction[, callback])
     .then(callback)
 ```
 
@@ -77,8 +77,11 @@ password = PasswordGenerator.generatePasswordAsync(options, randomFunction[, cal
 ```javascript
 let passwordGenerator = new PasswordGenerator([options, [randomFunction]])
 
+passwordGenerator.options = { ... }
+passwordGenerator.random = () => { ... }
+
 password = passwordGenerator.generatePassword([options, [randomFunction]])
-password = passwordGenerator.generatePasswordAsync(options, randomFunction[, callback])
+password = passwordGenerator.generatePassword(options, [randomFunction[, callback]])
     .then(callback)
 ```
 

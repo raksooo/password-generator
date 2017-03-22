@@ -42,12 +42,20 @@ class PasswordGenerator {
             : this._generatePasswordAsync(options, random, callback)
     }
 
+    _generatePassword(options, random, f) {
+        options = Object.assign(this._options, options)
+        let characters = this._generateCharacters(options)
+
+        for (let i=0; i<options.length; i++) {
+            f(characters, random)
+        }
+    }
+
     _generatePasswordSync(options, random) {
         let password = ''
         this._generatePassword(options, random, (characters, random) => {
             password += this._randomFromArray(characters, random())
         })
-
         return password
     }
 
@@ -67,15 +75,6 @@ class PasswordGenerator {
                 callback && callback(password)
                 return password
             })
-    }
-
-    _generatePassword(options, random, f) {
-        options = Object.assign(this._options, options)
-        let characters = this._generateCharacters(options)
-
-        for (let i=0; i<options.length; i++) {
-            f(characters, random)
-        }
     }
 
     _randomFromArray(array, random) {
