@@ -26,6 +26,12 @@ describe('Generate passwords', function() {
                 expect(c).to.equal(array[0])
             })
         })
+
+        it('should generate an empty password', function() {
+            let password = this.generator.generatePassword({ length: 0 })
+            expect(password).to.be.a('string')
+            expect(password).to.have.length(0)
+        })
     })
 
     describe('Asynchronously', function() {
@@ -85,6 +91,28 @@ describe('Generate passwords', function() {
                     })
                     done()
                 })
+        })
+
+        it('should generate an empty password', function(done) {
+            let password = this.generator.generatePassword({ length: 0 }, random)
+                .then(password => {
+                    expect(password).to.be.a('string')
+                    expect(password).to.have.length(0)
+                    done()
+                })
+        })
+
+        it('should only use the random result from the promise if it supports both', function(done) {
+            this.generator.generatePassword({ }, callback => {
+                return new Promise((resolve, reject) => {
+                    let random = Math.random()
+                    callback(random)
+                    resolve(random)
+                })
+            }).then(password => {
+                expect(password).to.have.length(25)
+                done()
+            }).catch(console.error.bind(console))
         })
     })
 
@@ -169,6 +197,13 @@ describe('Generate passwords', function() {
                     expect(password.charCodeAt(i)).to.not.be.within(91, 96)
                     expect(password.charCodeAt(i)).to.not.be.above(122)
                 }
+            })
+
+            it('should not save options for next time', function() {
+                let passwordGenerator = new PasswordGenerator({ length: 25 })
+                passwordGenerator.generatePassword({ length: 10 })
+                let password = passwordGenerator.generatePassword()
+                expect(password).to.have.length(25)
             })
         })
     })

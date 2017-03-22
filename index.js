@@ -13,7 +13,7 @@ class PasswordGenerator {
     }
 
     set options(options) {
-        this._options = Object.assign(this._options, options)
+        Object.assign(this._options, options)
     }
 
     set random(f) {
@@ -35,7 +35,7 @@ class PasswordGenerator {
     generatePassword(options, random = this._random, callback) {
         let sync = false
         try {
-            sync = typeof random() === 'number'
+            sync = typeof random(() => {}) === 'number'
         } catch(e) { }
 
         return sync ? this._generatePasswordSync(options, random)
@@ -43,10 +43,11 @@ class PasswordGenerator {
     }
 
     _generatePassword(options, random, f) {
-        options = Object.assign(this._options, options)
-        let characters = this._generateCharacters(options)
+        let mergedOptions = JSON.parse(JSON.stringify(this._options))
+        Object.assign(mergedOptions, options)
+        let characters = this._generateCharacters(mergedOptions)
 
-        for (let i=0; i<options.length; i++) {
+        for (let i=0; i<mergedOptions.length; i++) {
             f(characters, random)
         }
     }
@@ -98,14 +99,9 @@ class PasswordGenerator {
         })
     }
 
-    static generatePassword(options, random) {
+    static generatePassword(options, random, callback) {
         let passwordGenerator = new PasswordGenerator()
         return passwordGenerator.generatePassword(...arguments)
-    }
-
-    static generatePasswordAsync(options, random, callback) {
-        let passwordGenerator = new PasswordGenerator()
-        return passwordGenerator.generatePasswordAsync(...arguments)
     }
 
     static generatePasswordFromWords(numberOfWords = 5, language = 'english') {
