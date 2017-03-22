@@ -43,12 +43,12 @@ class PasswordGenerator {
     }
 
     _generatePasswordSync(options, random) {
-        let chars = []
+        let password = ''
         this._generatePassword(options, random, (characters, random) => {
-            chars.push(this._randomFromArray(characters, random()))
+            password += this._randomFromArray(characters, random())
         })
 
-        return chars.join('')
+        return password
     }
 
     _generatePasswordAsync(options, random, callback) {
