@@ -29,12 +29,13 @@ describe('Generate passwords', function() {
     })
 
     describe('Asynchronously', function() {
+        let random = callback => callback(Math.random())
         before(function() {
             this.generator = new PasswordGenerator({ length: 25 })
         })
 
         it('should generate a string with correct length and send it to callback', function(done) {
-            this.generator.generatePasswordAsync({}, undefined, password => {
+            this.generator.generatePassword({}, random, password => {
                 expect(password).to.be.a('string')
                 expect(password).to.have.length(25)
                 done()
@@ -42,7 +43,7 @@ describe('Generate passwords', function() {
         })
 
         it('should generate a string with correct length and resolve promise with it', function(done) {
-            this.generator.generatePasswordAsync()
+            this.generator.generatePassword({}, random)
                 .then(password => {
                     expect(password).to.be.a('string')
                     expect(password).to.have.length(25)
@@ -52,10 +53,10 @@ describe('Generate passwords', function() {
 
         it('should generate two strings which are not equal', function(done) {
             let password1
-            this.generator.generatePasswordAsync()
+            this.generator.generatePassword({}, random)
                 .then(password => {
                     password1 = password
-                    return this.generator.generatePasswordAsync()
+                    return this.generator.generatePassword({}, random)
                 }).then(password2 => {
                     expect(password1).to.not.equal(password2)
                     done()
@@ -63,7 +64,7 @@ describe('Generate passwords', function() {
         })
 
         it('should generate a string with supplied "random" function', function(done) {
-            this.generator.generatePasswordAsync({}, callback => callback(0))
+            this.generator.generatePassword({}, callback => callback(0))
                 .then(password => {
                     expect(password).to.have.length(25)
                     let array = password.split('')
@@ -75,7 +76,7 @@ describe('Generate passwords', function() {
         })
 
         it('should generate a string with supplied "random" function which returns a promise', function(done) {
-            this.generator.generatePasswordAsync({}, () => Promise.resolve(0))
+            this.generator.generatePassword({}, () => Promise.resolve(0))
                 .then(password => {
                     expect(password).to.have.length(25)
                     let array = password.split('')

@@ -32,17 +32,26 @@ class PasswordGenerator {
         return characters.split('')
     }
 
-    generatePassword(options, random = this._random) {
+    generatePassword(options, random = this._random, callback) {
+        let sync = false
+        try {
+            sync = typeof random() === 'number'
+        } catch(e) { }
+
+        return sync ? this._generatePasswordSync(options, random)
+            : this._generatePasswordAsync(options, random, callback)
+    }
+
+    _generatePasswordSync(options, random) {
         let chars = []
         this._generatePassword(options, random, (characters, random) => {
             chars.push(this._randomFromArray(characters, random()))
         })
 
         return chars.join('')
-
     }
 
-    generatePasswordAsync(options, random = (c => c(this._random())), callback) {
+    _generatePasswordAsync(options, random, callback) {
         let chars = []
         let generator = Promise.resolve()
         this._generatePassword(options, random, (characters, random) => {
