@@ -87,6 +87,7 @@ password = passwordGenerator.generatePassword(options, [randomFunction[, callbac
 
 #### Words
 Both english and spanish is currently available
+
 ##### Node.js
 ```javascript
 password = PasswordGenerator.generatePasswordFromWords([length[, language]])
