@@ -32,18 +32,14 @@ class PasswordGenerator {
         return characters.split('')
     }
 
-    generatePassword(options, randomFunction) {
-        options = Object.assign(this._options, options)
-        let random = randomFunction || this._random
-        let characters = this._generateCharacters(options)
-
+    generatePassword(options, randomFunction = this._random) {
         let password = ''
-        for (let i=0; i<options.length; i++) {
-            let character = Math.floor(random() * characters.length)
-            password += characters[character]
-        }
+        this._generatePassword(options, randomFunction, (characters, random) => {
+            password += this._randomFromArray(characters, random())
+        })
 
         return password
+
     }
 
     static generatePassword(options, randomFunction) {
@@ -51,18 +47,32 @@ class PasswordGenerator {
         return passwordGenerator.generatePassword(...arguments)
     }
 
-    generatePasswordAsync(options, randomFunction, callback) {
+    generatePasswordAsync(options, randomFunction = (c => c(this._random())), callback) {
+        let chars = []
+        let generator = Promise.resolve()
+        this._generatePassword(options, randomFunction, (characters, random) => {
+            generator = generator
+                .then(this._promiseOrCallback.bind(this, random))
+                .then(this._randomFromArray.bind(this, characters))
+                .then(chars.push.bind(chars))
+        })
+
+        return generator
+            .then(chars.join.bind(chars, ''))
+            .then(password => {
+                callback && callback(password)
+                return password
+            })
+    }
+
+    _generatePassword(options, randomFunction, f) {
         options = Object.assign(this._options, options)
-        let random = randomFunction || (callback => callback(this._random()))
+        let random = randomFunction
         let characters = this._generateCharacters(options)
 
-        return new Promise((resolve, reject) => {
-            this._generatePasswordAsync(options.length, '', characters, random,
-                    password => {
-                resolve(password)
-                callback && callback(password)
-            })
-        })
+        for (let i=0; i<options.length; i++) {
+            f(characters, random)
+        }
     }
 
     static generatePasswordAsync(options, randomFunction, callback) {
@@ -70,33 +80,25 @@ class PasswordGenerator {
         return passwordGenerator.generatePasswordAsync(...arguments)
     }
 
-    _generatePasswordAsync(i, password, characters, randomFunction, callback) {
-        if (i === 0) {
-            callback(password)
-        } else {
-            let randomCallback = random => {
-                let character = Math.floor(random * characters.length)
-                password += characters[character]
-                this._generatePasswordAsync(i - 1, password, characters,
-                    randomFunction, callback)
-            }
-
-            this._promiseOrCallback(randomFunction, randomCallback)
-        }
+    _randomFromArray(array, random) {
+        let n = Math.floor(random * array.length)
+        return array[n]
     }
 
-    _promiseOrCallback(f, callback) {
-        let promiseCheck = result => typeof result !== 'undefined'
-            && typeof result.then === 'function'
-        let a = {}
-        a.maybePromise = f(function() {
-            if (!promiseCheck(a.maybePromise)) {
-                callback(...arguments)
+    _promiseOrCallback(f) {
+        return new Promise((resolve, reject) => {
+            let promiseCheck = result => typeof result !== 'undefined'
+                && typeof result.then === 'function'
+            let a = {}
+            a.maybePromise = f(function() {
+                if (!promiseCheck(a.maybePromise)) {
+                    resolve(...arguments)
+                }
+            })
+            if (promiseCheck(a.maybePromise)) {
+                resolve(a.maybePromise)
             }
         })
-        if (promiseCheck(a.maybePromise)) {
-            a.maybePromise.then(callback)
-        }
     }
 
     static generatePasswordFromWords(numberOfWords = 5, language = 'english') {
@@ -112,8 +114,7 @@ class PasswordGenerator {
 
         let password = ''
         for (let i=0; i<numberOfWords; i++) {
-            let index = Math.floor(Math.random() * words.length)
-            password += words[index]
+            password += this._randomFromArray(words, Math.random())
         }
 
         return password
